@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useRouter } from "next/router";
+import Link from "next/link";
 
 export default function Home() {
   const router = useRouter();
@@ -18,12 +19,9 @@ export default function Home() {
         A simple way for Pioneers to support their favorite creators with Pi tips.
       </p>
 
-      <a
-        href="/login"
-        className="bg-black text-white px-6 py-3 rounded hover:bg-gray-800 transition"
-      >
+      <Link href="/login" className="bg-black text-white px-6 py-3 rounded hover:bg-gray-800 transition">
         Get Started
-      </a>
+      </Link>
     </main>
   );
 }

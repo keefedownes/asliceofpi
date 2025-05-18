@@ -12,14 +12,12 @@ export default function Login() {
   }, [user]);
 
   const handleLogin = async () => {
-    const { data, error } = await supabase.auth.signInWithOAuth({
+    const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
     });
 
     if (error) {
       console.error("Login error:", error.message);
-    } else {
-      console.log("Redirecting to Google...");
     }
   };
 
