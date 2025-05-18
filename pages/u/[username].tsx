@@ -1,6 +1,8 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import confetti from "canvas-confetti";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 interface User {
   username: string;
@@ -26,7 +28,6 @@ export default function UserPage() {
 
   useEffect(() => {
     if (!username || typeof username !== "string") return;
-
     fetch(`/api/getUser?username=${username}`)
       .then((res) => res.json())
       .then((data) => setUser(data.user));
@@ -44,65 +45,67 @@ export default function UserPage() {
 
   if (!user) {
     return (
-      <main className="p-6 text-center">
-        <p>Loading profile...</p>
+      <main className="min-h-screen bg-[#1c132b] text-white flex items-center justify-center">
+        <p className="text-lg text-gray-300">Loading profile...</p>
       </main>
     );
   }
 
   return (
-    <main className="p-6 max-w-lg mx-auto text-center">
-      <img
-        src={user.profile_img || "/default-avatar.png"}
-        alt="avatar"
-        onError={(e) => {
-          (e.target as HTMLImageElement).src = "/default-avatar.png";
-        }}
-        className="w-24 h-24 rounded-full mx-auto mb-4 object-cover"
-      />
+    <main className="min-h-screen bg-[#1c132b] text-white px-4 py-12">
+      <div className="max-w-md mx-auto bg-[#2C2351] p-6 rounded-lg shadow-lg border border-[#5D4DAA] text-center">
+        <img
+          src={user.profile_img || "/default-avatar.png"}
+          alt="avatar"
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = "/default-avatar.png";
+          }}
+          className="w-24 h-24 rounded-full mx-auto mb-4 object-cover border-2 border-yellow-400"
+        />
 
-      <h1 className="text-xl font-bold">@{user.username}</h1>
-      <p className="text-gray-600 mb-6">{user.bio || "No bio yet."}</p>
+        <h1 className="text-2xl font-bold text-[#FCD535]">@{user.username}</h1>
+        <p className="text-sm text-gray-300 mb-6">{user.bio || "No bio yet."}</p>
 
-      <h2 className="text-lg font-semibold mb-2">🍰 Send a slice of Pi</h2>
+        <h2 className="text-lg font-semibold mb-3 text-purple-200">🍰 Send a slice of Pi</h2>
 
-      <div className="flex justify-center gap-2 flex-wrap mb-4">
-        {[1, 3.14, 5, 10].map((amt) => (
-          <button
-            key={amt}
-            onClick={() => setAmount(String(amt))}
-            className={`px-4 py-2 rounded-full border text-sm font-medium ${
-              amount === String(amt)
-                ? "bg-purple-600 text-white"
-                : "bg-purple-100 text-purple-800 hover:bg-purple-200"
-            }`}
-          >
-            {amt} π
-          </button>
-        ))}
+        <div className="flex justify-center flex-wrap gap-2 mb-4">
+          {[1, 3.14, 5, 10].map((amt) => (
+            <Button
+              key={amt}
+              variant={amount === String(amt) ? "default" : "outline"}
+              className={`rounded-full px-5 py-2 ${
+                amount === String(amt)
+                  ? "bg-purple-600 text-white"
+                  : "border-purple-600 text-purple-200 hover:bg-purple-800"
+              }`}
+              onClick={() => setAmount(String(amt))}
+            >
+              {amt} π
+            </Button>
+          ))}
+        </div>
+
+        <Input
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          placeholder="Add a message (optional)"
+          className="bg-[#3B2F63] text-white mb-3"
+        />
+
+        <Button
+          onClick={copyToClipboard}
+          className="w-full bg-[#FCD535] text-[#3B2F63] hover:bg-yellow-300 font-bold"
+        >
+          Copy Wallet: {user.wallet_address.slice(0, 6)}...
+        </Button>
+
+        {copied && <p className="text-green-400 mt-2">✔ Copied to clipboard!</p>}
+        {success && (
+          <p className="text-green-500 mt-2 font-medium">
+            🎉 Thanks for supporting @{user.username}!
+          </p>
+        )}
       </div>
-
-      <input
-        type="text"
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-        placeholder="Add a message (optional)"
-        className="w-full border rounded p-2 mb-3"
-      />
-
-      <button
-        onClick={copyToClipboard}
-        className="w-full bg-black text-white py-2 px-4 rounded hover:bg-gray-800 transition"
-      >
-        Copy Wallet: {user.wallet_address.slice(0, 6)}...
-      </button>
-
-      {copied && <p className="text-green-600 mt-2">✔ Copied to clipboard!</p>}
-      {success && (
-        <p className="text-green-700 mt-2 font-medium">
-          🎉 Thanks for supporting @{user.username}!
-        </p>
-      )}
     </main>
   );
 }
