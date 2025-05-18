@@ -1,41 +1,38 @@
-import { useState } from "react";
-import { supabase } from "../lib/supabaseClient";
-import { useRouter } from "next/router";
+import { useEffect } from "react";
+import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 
 export default function Login() {
-  const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();
+  const supabase = useSupabaseClient();
+  const user = useUser();
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    const { error } = await supabase.auth.signInWithOtp({ email });
-    setLoading(false);
-    if (error) alert("Login failed: " + error.message);
-    else alert("Check your email for the login link!");
+  useEffect(() => {
+    if (user) {
+      window.location.href = "/dashboard";
+    }
+  }, [user]);
+
+  const handleLogin = async () => {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+    });
+
+    if (error) {
+      console.error("Login error:", error.message);
+    } else {
+      console.log("Redirecting to Google...");
+    }
   };
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-6">
-      <h1 className="text-2xl font-semibold mb-4">Log In</h1>
-      <form onSubmit={handleLogin} className="w-full max-w-sm">
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          className="w-full px-4 py-2 border rounded mb-4"
-        />
-        <button
-          type="submit"
-          className="w-full bg-black text-white px-4 py-2 rounded"
-          disabled={loading}
-        >
-          {loading ? "Sending..." : "Send Magic Link"}
-        </button>
-      </form>
+    <main className="flex flex-col items-center justify-center p-8 text-center max-w-xl mx-auto">
+      <h1 className="text-2xl font-bold mb-4">Log in to A Slice of Pi</h1>
+      <p className="text-gray-600 mb-6">Sign in to claim your profile and receive tips.</p>
+      <button
+        onClick={handleLogin}
+        className="bg-black text-white px-6 py-3 rounded hover:bg-gray-800 transition"
+      >
+        Sign in with Google
+      </button>
     </main>
   );
 }

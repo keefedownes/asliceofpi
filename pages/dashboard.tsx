@@ -6,6 +6,7 @@ import { useRouter } from "next/router";
 export default function Dashboard() {
   const user = useUser();
   const router = useRouter();
+
   const [username, setUsername] = useState("");
   const [bio, setBio] = useState("");
   const [wallet, setWallet] = useState("");
@@ -13,11 +14,14 @@ export default function Dashboard() {
   const [errorMsg, setErrorMsg] = useState("");
   const [isEditing, setIsEditing] = useState(false);
 
+  // Redirect to login if no user
   useEffect(() => {
-    if (user === null) router.push("/login");
-  }, [user]);
-  if (user === null) return null;
+    if (user === null) {
+      router.push("/login");
+    }
+  }, [user, router]);
 
+  // Load profile if logged in
   useEffect(() => {
     if (!user) return;
     const fetchProfile = async () => {
@@ -26,6 +30,7 @@ export default function Dashboard() {
         .select("username, bio, wallet_address")
         .eq("id", user.id)
         .single();
+
       if (data) {
         setUsername(data.username || "");
         setBio(data.bio || "");
@@ -44,13 +49,19 @@ export default function Dashboard() {
     setSaving(true);
     setErrorMsg("");
 
-    const { data: existing } = await supabase
+    const { data: existing, error: checkError } = await supabase
       .from("users")
       .select("id")
       .eq("username", username)
       .neq("id", user?.id);
 
-    if (existing.length > 0) {
+    if (checkError) {
+      setErrorMsg("Something went wrong. Please try again.");
+      setSaving(false);
+      return;
+    }
+
+    if (existing && existing.length > 0) {
       setErrorMsg("This username is already taken.");
       setSaving(false);
       return;
@@ -62,6 +73,7 @@ export default function Dashboard() {
       bio,
       wallet_address: wallet,
     });
+
     setSaving(false);
     setIsEditing(false);
   };
@@ -70,6 +82,8 @@ export default function Dashboard() {
     await supabase.auth.signOut();
     router.push("/");
   };
+
+  if (user === null) return null;
 
   return (
     <main className="p-6 max-w-xl mx-auto">
